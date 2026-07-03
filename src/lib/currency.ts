@@ -1,0 +1,1 @@
+export const EXCHANGE_RATES: Record<string, number> = { USD: 1, CDF: 2850, RWF: 1280 }; export const convertCurrency = (amount: number, from: string, to: string): number => { if (from === to) return amount; const inUSD = amount / EXCHANGE_RATES[from]; return inUSD * EXCHANGE_RATES[to]; };
