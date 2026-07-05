@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Shield, Search, Filter, CheckSquare, Square, CheckCircle, AlertTriangle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-import { TAX_INCENTIVES } from '../../tradeData';
+import { TAX_INCENTIVES, TRANSLATIONS } from '../../tradeData';
 
 interface IncentivesProps {
   }
@@ -126,10 +126,10 @@ export const Incentives: React.FC<IncentivesProps> = () => {
                     </span>
                   </div>
                   <h3 className="text-sm font-extrabold text-zinc-900 dark:text-white mt-2">
-                    {inc.titleKey}
+                    {TRANSLATIONS['en'][inc.titleKey] || inc.titleKey}
                   </h3>
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1.5 leading-relaxed">
-                    {inc.descriptionKey}
+                    {TRANSLATIONS['en'][inc.descriptionKey] || inc.descriptionKey}
                   </p>
                 </div>
 
@@ -138,7 +138,7 @@ export const Incentives: React.FC<IncentivesProps> = () => {
                     Benefit Rate:
                   </div>
                   <div className="text-xs font-bold text-brand-600 dark:text-brand-400 mt-0.5">
-                    {inc.benefitsKey}
+                    {TRANSLATIONS['en'][inc.benefitsKey] || inc.benefitsKey}
                   </div>
 
                   <button
@@ -182,7 +182,7 @@ export const Incentives: React.FC<IncentivesProps> = () => {
               >
                 {TAX_INCENTIVES.map((inc) => (
                   <option key={inc.id} value={inc.id}>
-                    {inc.titleKey}
+                    {TRANSLATIONS['en'][inc.titleKey] || inc.titleKey}
                   </option>
                 ))}
               </select>
@@ -211,7 +211,7 @@ export const Incentives: React.FC<IncentivesProps> = () => {
                     ) : (
                       <Square className="h-4.5 w-4.5 text-zinc-400 flex-none mt-0.5" />
                     )}
-                    <span className="leading-relaxed">{reqKey}</span>
+                    <span className="leading-relaxed">{TRANSLATIONS['en'][reqKey] || reqKey}</span>
                   </button>
                 );
               })}
