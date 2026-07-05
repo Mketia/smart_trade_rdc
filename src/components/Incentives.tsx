@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { Shield, Search, Filter, CheckSquare, Square, CheckCircle, AlertTriangle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
+import { TAX_INCENTIVES } from '../../tradeData';
+
 interface IncentivesProps {
   }
-
-const TAX_INCENTIVES: any[] = [];
 
 export const Incentives: React.FC<IncentivesProps> = () => {
   
