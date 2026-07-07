@@ -784,8 +784,5 @@ export const TRANSLATIONS: Record<string, Record<string, string>> = {
     dash_stat_flow: "Uvukaji wa Kila Siku wa Mpaka",
     dash_currency_calc: "Kikokotoo cha Haraka cha Fedha",
     dash_news_ticker: "HABARI MPYA: Kiwango cha chini cha utaratibu wa biashara uliorahisishwa (STR) wa EAC kinabaki $2,000. • Tovuti ya kielektroniki ya Rubavu/Gisenyi iko mtandaoni. • Ada ya OCC nchini DRC ni 1.5% ya CIF. • Msamaha wa kodi kwa pembejeo za kilimo DRC uko wazi.",
-
-
-<truncated 1099 bytes>
-
-NOTE: The output was truncated because it was too long. Use a more targeted query or a smaller range to get the information you need.
+  }
+};
