@@ -7,8 +7,6 @@ type GlobalStateContextType = {
   setToken: (token: string | null) => void;
   user: any;
   setUser: (user: any) => void;
-  darkMode: boolean;
-  setDarkMode: (dark: boolean) => void;
   taxRates: any;
   setTaxRates: (rates: any) => void;
   stats: any;
@@ -24,7 +22,6 @@ const GlobalStateContext = createContext<GlobalStateContextType | undefined>(und
 export function GlobalStateProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
-  const [darkMode, setDarkMode] = useState<boolean>(false);
 
   const [taxRates, setTaxRates] = useState({
     baseDutyBeans: 0.25,
@@ -64,20 +61,13 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     }
   ]);
 
-  // Initial Auth & Theme load
+  // Initial Auth load
   useEffect(() => {
     const savedToken = localStorage.getItem('st_token');
     const savedUser = localStorage.getItem('st_user');
     if (savedToken && savedUser) {
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
-    }
-
-    const savedDark = localStorage.getItem('st_dark');
-    if (savedDark !== null) {
-      setDarkMode(savedDark === 'true');
-    } else {
-      setDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
     }
   }, []);
 
@@ -114,15 +104,6 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('st_dark', String(darkMode));
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
-
-  useEffect(() => {
     localStorage.setItem('st_rates', JSON.stringify(taxRates));
   }, [taxRates]);
 
@@ -152,7 +133,6 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     <GlobalStateContext.Provider value={{
       token, setToken,
       user, setUser,
-      darkMode, setDarkMode,
       taxRates, setTaxRates,
       stats, setStats,
       surveyLogs, setSurveyLogs,
