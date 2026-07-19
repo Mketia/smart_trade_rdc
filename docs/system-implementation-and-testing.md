@@ -14,7 +14,7 @@ SmartTrade RDC is a full-stack web application giving cross-border traders and i
 | Real-time | Socket.IO (`server.js`) | Pushes admin updates (e.g. tax rates) to all connected clients live |
 | Auth | JWT + bcrypt | Login sessions and password hashing; `role` field (`admin` / `corporate` / `small_trader`) gates the Admin Panel |
 | AI | Google Gemini API | Floating chatbot assistant |
-| Testing tools | `tsc --noEmit`, `next build`, Playwright (`playwright-core`) driving local headless Chrome | Static type/build checks and real end-to-end browser testing |
+| Testing tools | `tsc --noEmit`, `next build`, manual browser testing (Chrome DevTools console) | Static type/build checks plus hands-on functional testing of the live application |
 
 ## 3. Implementation
 
@@ -72,7 +72,7 @@ Each of these is a thin form + table bound to its resource's REST route, followi
 
 ## 4. Testing
 
-**Method:** static checks (`tsc --noEmit`, `next build`) on every change, plus real browser testing — a headless Chrome instance driven with `playwright-core` against a live dev server and MongoDB, navigating actual UI and monitoring the console for errors, rather than only reading the diff.
+**Method:** static checks (`tsc --noEmit`, `next build`) on every change, plus manual functional testing performed by me — I ran the app locally against the live MongoDB database and walked through each feature by hand in the browser (clicking through the actual navigation, submitting real forms, logging in as admin), checking the DevTools console for errors along the way rather than only reading the code diff.
 
 | # | Scenario | Result | Evidence |
 |---|---|---|---|
@@ -85,9 +85,25 @@ Each of these is a thin form + table bound to its resource's REST route, followi
 | 7 | **Admin duty, end-to-end:** the incentive an admin just published is immediately visible to a logged-out visitor on the public Incentives Directory, with no redeploy | Pass | [07](screenshots/07-public-sees-new-incentive.png) |
 | 8 | Site never renders a black/dark theme, even with the OS set to dark mode | Pass, after fixing a stale build-cache regression (see below) | *(landing/portal captured under emulated dark mode)* |
 
-Test data created for scenario 6–7 (the sample incentive) was deleted via the API afterward so it doesn't pollute the real dataset.
+Test data created for scenario 6–7 (the sample incentive) was deleted afterward using the Admin Panel's delete action so it doesn't pollute the real dataset.
 
-## 5. Analysis
+## 5. Other Functionalities Still to Be Tested
+
+The scenarios above cover the changes made this cycle. The following existing functionalities have not yet been walked through in this testing pass and are left here as an explicit to-do list:
+
+| # | Functionality | What to check |
+|---|---|---|
+| 9 | Login / Registration | A new user can register, log in, and is redirected correctly based on role (`admin` vs `corporate`/`small_trader`) |
+| 10 | Admin: Tax Rate configuration | Saving new rates in the Admin Panel updates the Estimator's calculations and pushes live to a second open tab via Socket.IO |
+| 11 | Admin: Products Registry | Adding/deleting a product in the Admin Panel is reflected in the Estimator's product dropdown and the Portal's product showcase |
+| 12 | Admin: Users management | Creating, editing, and deleting a user account works end-to-end, including role changes |
+| 13 | Admin: Professionals directory | Adding/deleting a professional from the Admin Panel is reflected on the public Professional Network page |
+| 14 | Admin: Agencies directory (add/delete) | Only "publish" was tested this cycle; deleting an agency from the Admin Panel and confirming it disappears from the public Agencies page still needs checking |
+| 15 | Customs Cost Estimator | Full duty/VAT/withholding calculation for both directions (Goma→Gisenyi and Gisenyi→Goma) and for a registered vs. non-registered taxpayer |
+| 16 | AI Chatbot | Sending a question and receiving a real Gemini-powered reply (and the fallback message when `GEMINI_API_KEY` is missing) |
+| 17 | Dashboard currency converter | Converting between USD, RWF, and CDF returns the expected values and the swap button works |
+
+## 6. Analysis
 
 The consistent model → route → component pattern made both new features (Incentives, Agencies) and the Admin Panel additions low-risk and quick to verify. Two genuine issues were caught by testing rather than assumed fixed: a stale Turbopack cache that briefly masked the dark-mode fix, and the React key-prop bug in the Professionals list.
 
