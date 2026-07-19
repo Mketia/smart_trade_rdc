@@ -1,6 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
+/* Dark mode is disabled site-wide: gate `dark:` on an explicit .dark class
+   (which is never applied) instead of the OS prefers-color-scheme media query. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: 'Poppins', system-ui, -apple-system, sans-serif;
   --font-display: 'Poppins', system-ui, -apple-system, sans-serif;
