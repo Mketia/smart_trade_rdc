@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Shield, Calculator, MessageSquare, Zap, Target, Users } from 'lucide-react';
+import { ArrowRight, Shield, Calculator, MessageSquare, Zap, Target, Users, Building2 } from 'lucide-react';
 
 interface LandingPageProps {
   setCurrentTab: (tab: string) => void;
@@ -10,31 +10,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({ setCurrentTab }) => {
   return (
     <div className="space-y-24 pb-20">
       {/* Hero Section */}
-      <section className="relative pt-20 pb-16 md:pt-32 md:pb-24 overflow-hidden rounded-[3rem] bg-zinc-950 dark:bg-black text-white shadow-2xl mx-2 border border-zinc-900/50">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.3),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(245,158,11,0.2),transparent_50%)]" />
-        
+      <section className="relative pt-20 pb-16 md:pt-32 md:pb-24 overflow-hidden rounded-[3rem] bg-gradient-to-br from-brand-500 via-brand-600 to-accent-500 text-white shadow-2xl mx-2 border border-white/10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.12),transparent_50%)]" />
+
         {/* Animated grid overlay */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDEwaDQwTTAgMjBoNDBNMCAzMGg0ME0xMCAwdjQwTTIwIDB2NDBNejAgMHY0MCIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiLz48L3N2Zz4=')] opacity-50" />
 
         <div className="relative z-10 max-w-5xl mx-auto px-6 text-center space-y-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md">
             <span className="live-dot" />
-            <span className="text-xs font-bold text-zinc-300 tracking-wider uppercase">Live in the Democratic Republic of Congo</span>
+            <span className="text-xs font-bold text-white/90 tracking-wider uppercase">Live in the Democratic Republic of Congo</span>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[1.1] font-display">
-            Invest and Trade in the <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-accent-400">DRC</span> with Confidence
+            Invest and Trade in the <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-100">DRC</span> with Confidence
           </h1>
-          
-          <p className="max-w-2xl mx-auto text-lg md:text-xl text-zinc-400 leading-relaxed">
+
+          <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/85 leading-relaxed">
             We eliminate information asymmetry for investors and traders. Access real-time tax transparency, duty estimations, official incentive guidelines, and a network of professionals across the DRC.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <button
               onClick={() => setCurrentTab('home')}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-brand-500 hover:bg-brand-400 text-white font-bold text-sm shadow-lg shadow-brand-500/25 transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-white hover:bg-zinc-100 text-brand-700 font-bold text-sm shadow-lg shadow-brand-900/10 transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
             >
               Enter the Portal
               <ArrowRight className="h-5 w-5" />
@@ -148,13 +148,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ setCurrentTab }) => {
                 Connect directly with verified customs agents, clerks, and local logistics companies to help transit and process your operations seamlessly.
               </p>
             </div>
+
+            {/* Feature 5 */}
+            <div className="bg-white dark:bg-zinc-900 p-8 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="h-12 w-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center mb-6">
+                <Building2 className="h-6 w-6" />
+              </div>
+              <h3 className="text-lg font-black text-zinc-900 dark:text-white mb-3">Recommended Clearing Agencies</h3>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                Get matched with trusted agences en douane at the Goma-Gisenyi corridor to handle your customs declarations.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Target Audience */}
       <section className="max-w-6xl mx-auto px-4 md:px-8">
-        <div className="bg-gradient-to-br from-brand-900 to-zinc-900 rounded-[3rem] p-8 md:p-16 text-white overflow-hidden relative">
+        <div className="bg-gradient-to-br from-brand-500 to-accent-500 rounded-[3rem] p-8 md:p-16 text-white overflow-hidden relative">
           <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none">
             <Users className="w-64 h-64" />
           </div>
@@ -162,27 +173,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({ setCurrentTab }) => {
             <h2 className="text-3xl md:text-4xl font-black mb-12 font-display">Built For Every Operator</h2>
             <div className="grid md:grid-cols-3 gap-8">
               <div>
-                <h4 className="text-brand-400 font-bold mb-2">Foreign Investors</h4>
-                <p className="text-sm text-zinc-400 leading-relaxed">Understand the exact tax landscape, VAT rates, and exonerations before committing capital to the DRC's growing market.</p>
+                <h4 className="text-white font-bold mb-2">Foreign Investors</h4>
+                <p className="text-sm text-white/80 leading-relaxed">Understand the exact tax landscape, VAT rates, and exonerations before committing capital to the DRC's growing market.</p>
               </div>
               <div>
-                <h4 className="text-accent-400 font-bold mb-2">Corporate Importers</h4>
-                <p className="text-sm text-zinc-400 leading-relaxed">Calculate heavy commercial cargo costs with precise modeling and receive real-time updates when tariffs change.</p>
+                <h4 className="text-white font-bold mb-2">Corporate Importers</h4>
+                <p className="text-sm text-white/80 leading-relaxed">Calculate heavy commercial cargo costs with precise modeling and receive real-time updates when tariffs change.</p>
               </div>
               <div>
-                <h4 className="text-indigo-400 font-bold mb-2">SME Traders</h4>
-                <p className="text-sm text-zinc-400 leading-relaxed">Cross borders with confidence knowing your duty-free limits and quickly find logistics partners to handle your goods.</p>
+                <h4 className="text-white font-bold mb-2">SME Traders</h4>
+                <p className="text-sm text-white/80 leading-relaxed">Cross borders with confidence knowing your duty-free limits and quickly find logistics partners to handle your goods.</p>
               </div>
             </div>
-            
-            <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6">
+
+            <div className="mt-12 pt-8 border-t border-white/20 flex flex-col sm:flex-row items-center justify-between gap-6">
               <div>
                 <h4 className="font-bold text-lg">Ready to optimize your trade?</h4>
-                <p className="text-sm text-zinc-400">Join thousands of operators using SmartTrade RDC.</p>
+                <p className="text-sm text-white/80">Join thousands of operators using SmartTrade RDC.</p>
               </div>
               <button
                 onClick={() => setCurrentTab('home')}
-                className="whitespace-nowrap px-8 py-3 rounded-xl bg-white text-brand-900 font-black hover:bg-zinc-100 transition-colors shadow-lg cursor-pointer"
+                className="whitespace-nowrap px-8 py-3 rounded-xl bg-white text-brand-700 font-black hover:bg-zinc-100 transition-colors shadow-lg cursor-pointer"
               >
                 Access Portal
               </button>
