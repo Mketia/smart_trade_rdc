@@ -509,14 +509,14 @@ export const Estimator: React.FC<EstimatorProps> = ({
                     </span>
                   </div>
 
-                  <div className="bg-zinc-900 text-white dark:bg-zinc-850 rounded-2xl p-4">
-                    <span className="block text-[9px] font-bold text-zinc-400 uppercase tracking-wider">
+                  <div className="bg-zinc-100 text-zinc-900 border border-zinc-200 rounded-2xl p-4">
+                    <span className="block text-[9px] font-bold text-zinc-500 uppercase tracking-wider">
                       Total Capital Required (Value + Tax):
                     </span>
                     <span className="text-lg font-black font-display block mt-1">
                       ${calculation.totalCost.toFixed(2)} USD
                     </span>
-                    <span className="block text-[9px] text-zinc-400 mt-0.5 font-sans">
+                    <span className="block text-[9px] text-zinc-500 mt-0.5 font-sans">
                       = {(calculation.totalCost * (direction === 'goma_gisenyi' ? EXCHANGE_RATES.RWF : EXCHANGE_RATES.CDF)).toLocaleString(undefined, { maximumFractionDigits: 0 })} {direction === 'goma_gisenyi' ? 'RWF' : 'CDF'}
                     </span>
                   </div>
