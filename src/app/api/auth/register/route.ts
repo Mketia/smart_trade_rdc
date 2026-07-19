@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import connectToDatabase from '../../../../lib/mongodb';
 import User from '../../../../models/User';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_key_change_me_in_production';
 
 export async function POST(req: Request) {
   try {
@@ -30,7 +33,22 @@ export async function POST(req: Request) {
       description,
     });
 
-    return NextResponse.json({ message: 'User registered successfully', userId: newUser._id }, { status: 201 });
+    const token = jwt.sign(
+      { userId: newUser._id, role: newUser.role },
+      JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    return NextResponse.json({
+      message: 'User registered successfully',
+      token,
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role
+      }
+    }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ message: 'Error registering user', error: error.message }, { status: 500 });
   }
