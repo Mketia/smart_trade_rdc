@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Briefcase, Settings, Plus, Save, Trash2, Check, Users, Edit2, X } from 'lucide-react';
+import { Briefcase, Settings, Plus, Save, Trash2, Check, Users, Edit2, X, Shield, Building2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import confetti from 'canvas-confetti';
 
@@ -28,7 +28,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 }) => {
   
   // Active Admin Sub-tab
-  const [activeSubTab, setActiveSubTab] = useState<'rates' | 'products' | 'users' | 'professionals'>('rates');
+  const [activeSubTab, setActiveSubTab] = useState<'rates' | 'products' | 'users' | 'professionals' | 'incentives' | 'agencies'>('rates');
 
   // Rates Form State
   const [ratesForm, setRatesForm] = useState(taxRates);
@@ -45,7 +45,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [products, setProducts] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [professionals, setProfessionals] = useState<any[]>([]);
-  
+  const [incentives, setIncentives] = useState<any[]>([]);
+  const [agencies, setAgencies] = useState<any[]>([]);
+
   // New Professional Form State
   const [newProfName, setNewProfName] = useState('');
   const [newProfType, setNewProfType] = useState<'customs_agent' | 'logistics'>('customs_agent');
@@ -53,6 +55,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [newProfLocation, setNewProfLocation] = useState('');
   const [newProfEmail, setNewProfEmail] = useState('');
   const [newProfPhone, setNewProfPhone] = useState('');
+
+  // New Incentive Form State
+  const [newIncTitle, setNewIncTitle] = useState('');
+  const [newIncAuthority, setNewIncAuthority] = useState<'DRC (DGDA)' | 'Rwanda (RRA/RDB)' | 'EAC Regional'>('DRC (DGDA)');
+  const [newIncDescription, setNewIncDescription] = useState('');
+  const [newIncBenefits, setNewIncBenefits] = useState('');
+  const [newIncRequirements, setNewIncRequirements] = useState('');
+
+  // New Agency Form State
+  const [newAgencyName, setNewAgencyName] = useState('');
+  const [newAgencyLocation, setNewAgencyLocation] = useState('');
+  const [newAgencyDescription, setNewAgencyDescription] = useState('');
+  const [newAgencyEmail, setNewAgencyEmail] = useState('');
+  const [newAgencyPhone, setNewAgencyPhone] = useState('');
 
   // Fetch data on mount
   const [newUserName, setNewUserName] = useState('');
@@ -64,16 +80,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   
   useEffect(() => {
     const fetchData = async () => {
-      try {        const [usersRes, profsRes, prodsRes] = await Promise.all([
+      try {        const [usersRes, profsRes, prodsRes, incRes, agenciesRes] = await Promise.all([
           fetch('/api/users'),
           fetch('/api/professionals'),
-          fetch('/api/products')
+          fetch('/api/products'),
+          fetch('/api/incentives'),
+          fetch('/api/agencies')
         ]);
         if (usersRes.ok) setUsers(await usersRes.json());
         if (profsRes.ok) setProfessionals(await profsRes.json());
         if (prodsRes.ok) {
            const d = await prodsRes.json();
            setProducts(d.products || []);
+        }
+        if (incRes.ok) {
+          const d = await incRes.json();
+          setIncentives(d.incentives || []);
+        }
+        if (agenciesRes.ok) {
+          const d = await agenciesRes.json();
+          setAgencies(d.agencies || []);
         }
       } catch (err) {
         console.error('Failed to fetch admin data:', err);
@@ -309,6 +335,125 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
+  const handleAddIncentive = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newIncTitle || !newIncDescription || !newIncBenefits) return;
+
+    const newIncentive = {
+      title: newIncTitle,
+      authority: newIncAuthority,
+      description: newIncDescription,
+      benefits: newIncBenefits,
+      requirements: newIncRequirements.split(',').map(r => r.trim()).filter(Boolean)
+    };
+
+    try {
+      const response = await fetch('/api/incentives', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newIncentive)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIncentives([...incentives, data.incentive]);
+
+        setNewIncTitle('');
+        setNewIncDescription('');
+        setNewIncBenefits('');
+        setNewIncRequirements('');
+
+        confetti({
+          particleCount: 50,
+          spread: 50,
+          origin: { y: 0.8 },
+          colors: ['#10b981', '#34d399', '#ffffff']
+        });
+      }
+    } catch (err) {
+      console.error('Failed to add incentive:', err);
+    }
+  };
+
+  const handleDeleteIncentive = async (incId: string) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You want to delete this incentive?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#10b981',
+      cancelButtonColor: '#ef4444',
+      confirmButtonText: 'Yes, delete it!'
+    });
+    if (result.isConfirmed) {
+      try {
+        await fetch(`/api/incentives?id=${incId}`, { method: 'DELETE' });
+        setIncentives(incentives.filter(i => i._id !== incId));
+        Swal.fire('Deleted!', 'Incentive deleted successfully.', 'success');
+      } catch (err) {
+        console.error('Failed to delete incentive:', err);
+        Swal.fire('Error', 'Failed to delete incentive.', 'error');
+      }
+    }
+  };
+
+  const handleAddAgency = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAgencyName || !newAgencyLocation) return;
+
+    const newAgency = {
+      name: newAgencyName,
+      location: newAgencyLocation,
+      description: newAgencyDescription,
+      email: newAgencyEmail,
+      phone: newAgencyPhone,
+      verified: true
+    };
+
+    try {
+      const response = await fetch('/api/agencies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newAgency)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAgencies([...agencies, data.agency]);
+
+        setNewAgencyName('');
+        setNewAgencyLocation('');
+        setNewAgencyDescription('');
+        setNewAgencyEmail('');
+        setNewAgencyPhone('');
+      }
+    } catch (err) {
+      console.error('Failed to add agency:', err);
+    }
+  };
+
+  const handleDeleteAgency = async (agencyId: string) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You want to delete this agency?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#10b981',
+      cancelButtonColor: '#ef4444',
+      confirmButtonText: 'Yes, delete it!'
+    });
+    if (result.isConfirmed) {
+      try {
+        await fetch(`/api/agencies?id=${agencyId}`, { method: 'DELETE' });
+        setAgencies(agencies.filter(a => a._id !== agencyId));
+        Swal.fire('Deleted!', 'Agency has been deleted.', 'success');
+      } catch (err) {
+        console.error('Failed to delete agency:', err);
+        Swal.fire('Error', 'Failed to delete agency', 'error');
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col md:flex-row gap-6">
       {/* SIDEBAR */}
@@ -372,6 +517,28 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             >
               <Briefcase className="h-4 w-4" />
               Professionals
+            </button>
+            <button
+              onClick={() => setActiveSubTab('incentives')}
+              className={`flex items-center gap-3 px-4 py-3 text-xs font-bold rounded-xl transition-all cursor-pointer w-full text-left ${
+                activeSubTab === 'incentives'
+                  ? 'bg-brand-500 text-white shadow-md shadow-brand-500/20'
+                  : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+              }`}
+            >
+              <Shield className="h-4 w-4" />
+              Incentives
+            </button>
+            <button
+              onClick={() => setActiveSubTab('agencies')}
+              className={`flex items-center gap-3 px-4 py-3 text-xs font-bold rounded-xl transition-all cursor-pointer w-full text-left ${
+                activeSubTab === 'agencies'
+                  ? 'bg-brand-500 text-white shadow-md shadow-brand-500/20'
+                  : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+              }`}
+            >
+              <Building2 className="h-4 w-4" />
+              Agencies
             </button>
           </nav>
         </div>
@@ -938,6 +1105,228 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         <td className="px-4 py-3 text-right">
                           <button
                             onClick={() => handleDeleteProfessional(prof._id)}
+                            className="p-1 text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
+                            title="Delete"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SUBTAB CONTENT 6: Incentives Registry */}
+        {activeSubTab === 'incentives' && (
+          <div className="space-y-6">
+            <form onSubmit={handleAddIncentive} className="p-4 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-850 space-y-4">
+              <h3 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">Add New Tax Incentive</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-500 mb-1">Title</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. EAC Simplified Trade Regime"
+                    value={newIncTitle}
+                    onChange={(e) => setNewIncTitle(e.target.value)}
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none text-zinc-800 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-500 mb-1">Authority</label>
+                  <select
+                    value={newIncAuthority}
+                    onChange={(e) => setNewIncAuthority(e.target.value as any)}
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-2.5 py-2 text-xs font-semibold focus:outline-none text-zinc-800 dark:text-zinc-200"
+                  >
+                    <option value="DRC (DGDA)">DRC (DGDA)</option>
+                    <option value="Rwanda (RRA/RDB)">Rwanda (RRA/RDB)</option>
+                    <option value="EAC Regional">EAC Regional</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-500 mb-1">Description</label>
+                <textarea
+                  required
+                  rows={2}
+                  value={newIncDescription}
+                  onChange={(e) => setNewIncDescription(e.target.value)}
+                  className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none text-zinc-800 dark:text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-500 mb-1">Benefit Rate</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. 0% Import Duty"
+                    value={newIncBenefits}
+                    onChange={(e) => setNewIncBenefits(e.target.value)}
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none text-zinc-800 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-500 mb-1">Eligibility Requirements (comma-separated)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Value under $2,000, Certificate of origin"
+                    value={newIncRequirements}
+                    onChange={(e) => setNewIncRequirements(e.target.value)}
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none text-zinc-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end border-t border-zinc-150 dark:border-zinc-855 pt-3">
+                <button
+                  type="submit"
+                  className="flex items-center gap-1 px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-xs font-bold text-white shadow-sm cursor-pointer"
+                >
+                  <Plus className="h-4 w-4" />
+                  Publish Incentive
+                </button>
+              </div>
+            </form>
+
+            <div className="space-y-2.5">
+              <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Published Incentives ({incentives.length})</h3>
+
+              <div className="overflow-x-auto rounded-2xl border border-zinc-100 dark:border-zinc-850">
+                <table className="w-full text-left text-xs text-zinc-600 dark:text-zinc-400">
+                  <thead className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-150 dark:border-zinc-800 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                    <tr>
+                      <th className="px-4 py-3">Title</th>
+                      <th className="px-4 py-3">Authority</th>
+                      <th className="px-4 py-3">Benefit Rate</th>
+                      <th className="px-4 py-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-850 bg-white dark:bg-zinc-950">
+                    {incentives.map((inc) => (
+                      <tr key={inc._id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/10">
+                        <td className="px-4 py-3 font-bold text-zinc-800 dark:text-zinc-200">{inc.title}</td>
+                        <td className="px-4 py-3">{inc.authority}</td>
+                        <td className="px-4 py-3">{inc.benefits}</td>
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            onClick={() => handleDeleteIncentive(inc._id)}
+                            className="p-1 text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
+                            title="Delete"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SUBTAB CONTENT 7: Agencies Management */}
+        {activeSubTab === 'agencies' && (
+          <div className="space-y-6">
+            <form onSubmit={handleAddAgency} className="p-4 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-850 space-y-4">
+              <h3 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">Add New Clearing Agency</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-500 mb-1">Agency Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Volcano Clearing"
+                    value={newAgencyName}
+                    onChange={(e) => setNewAgencyName(e.target.value)}
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none text-zinc-800 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-500 mb-1">Location</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Goma, DRC"
+                    value={newAgencyLocation}
+                    onChange={(e) => setNewAgencyLocation(e.target.value)}
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none text-zinc-800 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-500 mb-1">Phone</label>
+                  <input
+                    type="text"
+                    value={newAgencyPhone}
+                    onChange={(e) => setNewAgencyPhone(e.target.value)}
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none text-zinc-800 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-500 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={newAgencyEmail}
+                    onChange={(e) => setNewAgencyEmail(e.target.value)}
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none text-zinc-800 dark:text-white"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-[10px] font-bold text-zinc-500 mb-1">Description</label>
+                  <input
+                    type="text"
+                    placeholder="Short note about services offered"
+                    value={newAgencyDescription}
+                    onChange={(e) => setNewAgencyDescription(e.target.value)}
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none text-zinc-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end border-t border-zinc-150 dark:border-zinc-855 pt-3">
+                <button
+                  type="submit"
+                  className="flex items-center gap-1 px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-xs font-bold text-white shadow-sm cursor-pointer"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Agency
+                </button>
+              </div>
+            </form>
+
+            <div className="space-y-2.5">
+              <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Recommended Agencies ({agencies.length})</h3>
+
+              <div className="overflow-x-auto rounded-2xl border border-zinc-100 dark:border-zinc-850">
+                <table className="w-full text-left text-xs text-zinc-600 dark:text-zinc-400">
+                  <thead className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-150 dark:border-zinc-800 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                    <tr>
+                      <th className="px-4 py-3">Name</th>
+                      <th className="px-4 py-3">Location</th>
+                      <th className="px-4 py-3">Contact</th>
+                      <th className="px-4 py-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-850 bg-white dark:bg-zinc-950">
+                    {agencies.map((agency) => (
+                      <tr key={agency._id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/10">
+                        <td className="px-4 py-3 font-bold text-zinc-800 dark:text-zinc-200">{agency.name}</td>
+                        <td className="px-4 py-3">{agency.location}</td>
+                        <td className="px-4 py-3">{agency.email || agency.phone || 'N/A'}</td>
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            onClick={() => handleDeleteAgency(agency._id)}
                             className="p-1 text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
                             title="Delete"
                           >
