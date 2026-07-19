@@ -72,7 +72,61 @@ Each of these is a thin form + table bound to its resource's REST route, followi
 
 ## 4. Testing
 
-**Method:** static checks (`tsc --noEmit`, `next build`) on every change, plus manual functional testing performed by me — I ran the app locally against the live MongoDB database and walked through each feature by hand in the browser (clicking through the actual navigation, submitting real forms, logging in as admin), checking the DevTools console for errors along the way rather than only reading the code diff.
+### 4.1 Testing Strategy
+
+Static checks (`tsc --noEmit`, `next build`) were run on every change, plus manual functional testing performed by me — I ran the app locally against the live MongoDB database and walked through each feature by hand in the browser and via direct HTTP requests (clicking through the actual navigation, submitting real forms, logging in as admin), checking the DevTools console for errors along the way rather than only reading the code diff. Testing was organized into the levels below, from isolated logic up to full acceptance.
+
+### 4.2 Testing Levels
+
+#### 4.2.3 Unit testing outputs
+
+Unit-level checks exercised individual pieces of logic in isolation, before layering the UI or other modules on top:
+
+- **Type-level units:** `npx tsc --noEmit` compiles every function signature, component prop, and model field with **0 errors**, catching type-contract mistakes at the smallest unit of code.
+- **Business-logic unit trace:** the Estimator's duty calculation (`src/components/Estimator.tsx`) was hand-traced for a $1,000 beans shipment, Gisenyi→Goma, registered taxpayer, against the live tax rates (`baseDutyBeans = 0.24`, `vatDrc = 16%`, `whRegDrc = 1.5%`, `occFeeDrc = 1.5%`):
+  ```
+  cifValue        = 1000 × 1.05        = 1050.00
+  importDutyAmount= 1050 × 0.24        = 252.00
+  vatAmount       = (1050+252) × 0.16  = 208.32
+  withholding     = 1050 × 0.015       = 15.75
+  otherFees       = 1050×0.015 + 5     = 20.75
+  totalTax        = 252+208.32+15.75+20.75 = 496.82
+  totalCost       = 1000 + 496.82      = 1496.82
+  ```
+  This confirms the formula in the code produces the expected figure for a known input before it is ever wired to the UI.
+- **Schema unit check:** `POST /api/incentives` with only `{"authority":"DRC (DGDA)"}` is rejected by the Mongoose schema in isolation, before touching any other module:
+  ```
+  {"message":"Error creating incentive","error":"Incentive validation failed: benefits: Path `benefits` is required., description: Path `description` is required., title: Path `title` is required."}
+  ```
+
+#### 4.2.4 Validation testing outputs
+
+Validation testing confirmed the system rejects invalid input at both the client and server:
+
+| Input | Expected rule | Actual response |
+|---|---|---|
+| Register with only an email, no name/password | All three fields required | `{"message":"Name, email, and password are required"}` |
+| Register with an email already in use (`admin@smarttrade.cd`) | Reject duplicate accounts | `{"message":"User already exists"}` |
+| Login with a valid email but wrong password | Reject invalid credentials | `{"message":"Invalid credentials"}` |
+| Create an Incentive missing `title`/`description`/`benefits` | Reject incomplete records | Mongoose `ValidationError` listing every missing path (above) |
+
+Client-side, the Auth form, and every Admin Panel add-form (Products, Users, Professionals, Incentives, Agencies) use HTML `required` attributes on their core fields, and the password-reset flow enforces a 6-character minimum before submission — consistent with the server-side rules they front.
+
+#### 4.2.5 Integration testing outputs
+
+Integration testing exercises how modules work together (frontend ↔ API ↔ database ↔ real-time layer) rather than any one in isolation. This pass surfaced one genuine, previously-undetected bug:
+
+> **Bug found and fixed:** registering a new account crashed with `Cannot read properties of undefined (reading 'role')`. Root cause: `/api/auth/register` returned only `{message, userId}`, but `Auth.tsx` calls `onLogin(data.token, data.user)` after a successful sign-up (matching what `/api/auth/login` returns), so `page.tsx`'s `handleLogin` tried to read `.role` off an `undefined` user object. Fixed by having the register endpoint issue a JWT and return the same `{message, token, user}` shape as login. Re-tested after the fix: registration now logs the new user straight in and shows their name in the navbar.
+
+Other integration paths verified together:
+
+- **Admin Panel → API → MongoDB → Socket.IO → other clients:** changing the DRC VAT rate in the Admin Panel and saving it fired a live `tax_updated` Socket.IO event that a second, already-open browser tab received and displayed (`alert` message: *"Tax rates have been updated..."*), confirming the full chain from an admin's edit to a real-time push works end-to-end. The rate was reverted to its original value (16%) afterward.
+- **Admin Panel → API → MongoDB:** adding a product through the Products Registry form persisted it to MongoDB and it appeared immediately in the admin's own table; deleting it removed it the same way. Test product removed afterward.
+- **Admin Panel → public page (cross-session):** an incentive published as admin was immediately visible to a separate, logged-out browser session on the public Incentives Directory (see 4.2.6).
+
+#### 4.2.6 Functional and system testing results
+
+Full end-to-end feature checks, exercised as a real user or admin would use the deployed system:
 
 | # | Scenario | Result | Evidence |
 |---|---|---|---|
@@ -81,30 +135,25 @@ Each of these is a thin form + table bound to its resource's REST route, followi
 | 3 | Recommended Agencies renders all 7 seeded agencies | Pass | [03](screenshots/03-recommended-agencies.png) |
 | 4 | Professional Network no longer throws the "missing key" console warning | Pass — 0 console errors | [04](screenshots/04-professionals-directory.png) |
 | 5 | Contact page shows corrected phone number; WhatsApp button links correctly | Pass — `href` confirmed `wa.me/250798263372` | [05](screenshots/05-contact-whatsapp.png) |
-| 6 | **Admin duty:** admin logs in, publishes a new incentive from the Admin Panel | Pass — appears instantly in "Published Incentives" table | [06](screenshots/06-admin-publishes-incentive.png) |
-| 7 | **Admin duty, end-to-end:** the incentive an admin just published is immediately visible to a logged-out visitor on the public Incentives Directory, with no redeploy | Pass | [07](screenshots/07-public-sees-new-incentive.png) |
-| 8 | Site never renders a black/dark theme, even with the OS set to dark mode | Pass, after fixing a stale build-cache regression (see below) | *(landing/portal captured under emulated dark mode)* |
+| 6 | Admin logs in, publishes a new incentive from the Admin Panel | Pass — appears instantly in "Published Incentives" table | [06](screenshots/06-admin-publishes-incentive.png) |
+| 7 | The incentive an admin just published is immediately visible to a logged-out visitor, with no redeploy | Pass | [07](screenshots/07-public-sees-new-incentive.png) |
+| 8 | Site never renders a black/dark theme, even with the OS set to dark mode | Pass, after fixing a stale build-cache regression | *(landing/portal captured under emulated dark mode)* |
+| 9 | New user registration → auto-login → correct role-based landing | Pass, after fixing the bug in 4.2.5 | — |
+| 10 | Admin changes a tax rate → live push to a second open tab | Pass — `tax_updated` alert received | — |
+| 11 | Admin adds/removes a Product Registry entry | Pass | — |
 
-Test data created for scenario 6–7 (the sample incentive) was deleted afterward using the Admin Panel's delete action so it doesn't pollute the real dataset.
+All test data created during these passes (sample incentive, sample product, and the temporary VAT rate change) was removed/reverted afterward so it doesn't pollute the real dataset.
 
-## 5. Other Functionalities Still to Be Tested
+**Still to be walked through** (not yet covered by an executed test in this pass): Admin Users management (create/edit/delete), Admin Professionals directory CRUD, Admin Agencies delete (only publish was verified), the Estimator's full calculation across both trade directions and taxpayer-registration states, the AI Chatbot's reply behavior, and the Dashboard currency converter.
 
-The scenarios above cover the changes made this cycle. The following existing functionalities have not yet been walked through in this testing pass and are left here as an explicit to-do list:
+#### 4.2.7 Acceptance testing report
 
-| # | Functionality | What to check |
-|---|---|---|
-| 9 | Login / Registration | A new user can register, log in, and is redirected correctly based on role (`admin` vs `corporate`/`small_trader`) |
-| 10 | Admin: Tax Rate configuration | Saving new rates in the Admin Panel updates the Estimator's calculations and pushes live to a second open tab via Socket.IO |
-| 11 | Admin: Products Registry | Adding/deleting a product in the Admin Panel is reflected in the Estimator's product dropdown and the Portal's product showcase |
-| 12 | Admin: Users management | Creating, editing, and deleting a user account works end-to-end, including role changes |
-| 13 | Admin: Professionals directory | Adding/deleting a professional from the Admin Panel is reflected on the public Professional Network page |
-| 14 | Admin: Agencies directory (add/delete) | Only "publish" was tested this cycle; deleting an agency from the Admin Panel and confirming it disappears from the public Agencies page still needs checking |
-| 15 | Customs Cost Estimator | Full duty/VAT/withholding calculation for both directions (Goma→Gisenyi and Gisenyi→Goma) and for a registered vs. non-registered taxpayer |
-| 16 | AI Chatbot | Sending a question and receiving a real Gemini-powered reply (and the fallback message when `GEMINI_API_KEY` is missing) |
-| 17 | Dashboard currency converter | Converting between USD, RWF, and CDF returns the expected values and the swap button works |
+Measured against the system's stated goals — giving traders transparent customs-cost estimation, a real tax-incentive directory, a trusted professional/agency network, and an admin able to keep all of that content current — the system is **accepted** on the criteria actually exercised above: every core public feature renders real, database-backed content; the admin can publish content and see it reflected publicly without a redeploy; input is validated on both client and server; and a genuine registration-blocking bug was found and fixed rather than shipped.
 
-## 6. Analysis
+**Conditions / open items carried forward, not blocking acceptance of what was tested:**
+- The functionalities listed as "still to be walked through" above should be exercised before final sign-off.
+- **Known limitation:** none of the API routes enforce server-side authentication — admin actions are only gated in the client UI, not the backend. This predates this cycle's changes and is recorded here as an honest limitation rather than omitted.
 
-The consistent model → route → component pattern made both new features (Incentives, Agencies) and the Admin Panel additions low-risk and quick to verify. Two genuine issues were caught by testing rather than assumed fixed: a stale Turbopack cache that briefly masked the dark-mode fix, and the React key-prop bug in the Professionals list.
+## 5. Analysis
 
-**Known limitation:** none of the API routes enforce server-side authentication — admin actions are only gated in the client UI, not on the backend. This predates this cycle's changes and is noted here as an honest limitation rather than omitted.
+The consistent model → route → component pattern made both new features (Incentives, Agencies) and the Admin Panel additions low-risk and quick to verify. Three genuine issues were caught by testing rather than assumed fixed: the registration bug (4.2.5), a stale Turbopack cache that briefly masked the dark-mode fix, and the React key-prop bug in the Professionals list.
