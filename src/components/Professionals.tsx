@@ -101,7 +101,7 @@ export const Professionals: React.FC<ProfessionalsProps> = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {filteredProfessionals.length > 0 ? (
             filteredProfessionals.map((prof) => (
-              <div key={prof.id} className="glass-panel p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow bg-white/50 dark:bg-zinc-900/50 flex flex-col justify-between">
+              <div key={prof._id} className="glass-panel p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow bg-white/50 dark:bg-zinc-900/50 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex gap-4 items-center">
