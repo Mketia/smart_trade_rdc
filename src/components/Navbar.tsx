@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home as HomeIcon, Shield, Menu, X, Calculator, MessageSquare, LogIn, LogOut, User as UserIcon } from 'lucide-react';
+import { Home as HomeIcon, Shield, Menu, X, Calculator, MessageSquare, LogIn, LogOut, User as UserIcon, Building2 } from 'lucide-react';
 
 interface NavbarProps {
   currentTab: string;
@@ -21,6 +21,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'home', label: 'Portal', icon: Shield },
     { id: 'estimator', label: 'Estimator', icon: Calculator },
     { id: 'professionals', label: 'Directory', icon: UserIcon },
+    { id: 'agencies', label: 'Agencies', icon: Building2 },
     { id: 'contact', label: 'Contact Us', icon: MessageSquare }
   ];
 
