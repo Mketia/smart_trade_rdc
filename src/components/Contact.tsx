@@ -43,7 +43,7 @@ export const Contact: React.FC<ContactProps> = () => {
             </div>
             <div>
               <h4 className="font-bold text-zinc-900 dark:text-white mb-1">Phone</h4>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">+243 999 000 111</p>
+              <a href="tel:+250798263372" className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-brand-500 transition-colors">+250 798 263 372</a>
             </div>
           </div>
           <div className="glass-panel p-6 rounded-2xl border border-zinc-150 dark:border-zinc-850 flex items-start gap-4">
