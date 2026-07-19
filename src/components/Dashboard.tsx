@@ -28,32 +28,32 @@ export const Dashboard: React.FC<DashboardProps> = ({ setCurrentTab, stats }) =>
   return (
     <div className="space-y-6">
       {/* Hero Welcome Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-900 to-zinc-900 p-6 md:p-8 text-white shadow-xl">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.15),transparent_40%)]" />
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-500 to-accent-500 p-6 md:p-8 text-white shadow-xl">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_40%)]" />
         <div className="relative z-10 max-w-2xl">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/20 px-3 py-1 text-xs font-semibold text-brand-400 backdrop-blur-md">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md">
             <span className="live-dot" />
             DRC Investment & Trade Hub
           </span>
           <h1 className="mt-4 text-3xl md:text-4xl font-black tracking-tight leading-none text-white">
             Welcome to Gomaâ€“Gisenyi Trade Portal
           </h1>
-          <p className="mt-3 text-sm md:text-base text-zinc-300 font-normal leading-relaxed">
+          <p className="mt-3 text-sm md:text-base text-white/85 font-normal leading-relaxed">
             Real-time decision support for border crossing, customs cost simulation, and regulatory tax incentives awareness.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <button
               onClick={() => setCurrentTab('estimator')}
-              className="flex items-center gap-1.5 rounded-xl bg-brand-500 hover:bg-brand-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-brand-500/20 hover:brightness-105 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 rounded-xl bg-white hover:bg-zinc-100 px-4 py-2.5 text-xs font-bold text-brand-700 shadow-md transition-all cursor-pointer"
             >
               <Calculator className="h-4 w-4" />
               Customs Cost Estimator
             </button>
             <button
               onClick={() => setCurrentTab('incentives')}
-              className="flex items-center gap-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 px-4 py-2.5 text-xs font-bold text-zinc-200 border border-zinc-700 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 rounded-xl bg-white/15 hover:bg-white/25 px-4 py-2.5 text-xs font-bold text-white border border-white/30 transition-all cursor-pointer"
             >
-              <Shield className="h-4 w-4 text-accent-500" />
+              <Shield className="h-4 w-4 text-white" />
               Tax Incentives
             </button>
           </div>
