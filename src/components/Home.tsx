@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ArrowRight, Calculator, Shield, Globe, ArrowUpRight, Users, Scale } from 'lucide-react';
+import { ArrowRight, Calculator, Shield, Globe, ArrowUpRight, Users, Scale, Briefcase, Building2 } from 'lucide-react';
 
 
 interface HomeProps {
@@ -133,6 +133,20 @@ export const Home: React.FC<HomeProps> = ({ setCurrentTab, setSelectedProduct, p
       tab: 'incentives',
       color: 'from-amber-500 to-orange-500'
     },
+    {
+      title: 'Professional Network',
+      desc: 'Connect directly with verified customs agents and logistics companies across the DRC to streamline your trade operations.',
+      icon: Briefcase,
+      tab: 'professionals',
+      color: 'from-indigo-500 to-blue-500'
+    },
+    {
+      title: 'Recommended Clearing Agencies',
+      desc: 'Get matched with trusted agences en douane at the Goma-Gisenyi corridor to handle your import and export declarations.',
+      icon: Building2,
+      tab: 'agencies',
+      color: 'from-rose-500 to-fuchsia-500'
+    },
   ];
 
   return (
@@ -219,7 +233,7 @@ export const Home: React.FC<HomeProps> = ({ setCurrentTab, setSelectedProduct, p
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((srv, idx) => {
             const Icon = srv.icon;
             return (
