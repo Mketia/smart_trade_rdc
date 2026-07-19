@@ -8,10 +8,12 @@ import { Home } from '../components/Home';
 import { Dashboard } from '../components/Dashboard';
 import { Estimator } from '../components/Estimator';
 import { Professionals } from '../components/Professionals';
+import { Agencies } from '../components/Agencies';
 import { Incentives } from '../components/Incentives';
 import { Contact } from '../components/Contact';
 import { Auth } from '../components/Auth';
 import { Chatbot } from '../components/Chatbot';
+import { WhatsAppButton } from '../components/WhatsAppButton';
 import { useGlobalState } from '../context/GlobalStateContext';
 
 export default function App() {
@@ -82,6 +84,8 @@ export default function App() {
         return <Incentives />;
       case 'professionals':
         return <Professionals />;
+      case 'agencies':
+        return <Agencies />;
       case 'contact':
         return <Contact />;
       default:
@@ -108,6 +112,9 @@ export default function App() {
 
       {/* Global AI Chatbot Widget */}
       <Chatbot />
+
+      {/* Global WhatsApp Contact Widget */}
+      <WhatsAppButton />
 
       {/* Footer credits */}
       <Footer />
